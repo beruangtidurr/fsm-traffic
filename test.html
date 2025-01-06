@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Traffic Light FSM Simulation</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .intersection {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            background-color: #333;
+        }
+        
+        .road {
+            position: absolute;
+            background-color: #666;
+        }
+        
+        .road.vertical {
+            width: 60px;
+            height: 400px;
+            left: 170px;
+        }
+        
+        .road.horizontal {
+            width: 400px;
+            height: 60px;
+            top: 170px;
+        }
+        
+        .traffic-light {
+            position: absolute;
+            width: 30px;
+            height: 90px;
+            background-color: #222;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+            gap: 5px;
+        }
+        
+        .light {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #444;
+        }
+        
+        .light.red.active { background-color: #ff0000; }
+        .light.yellow.active { background-color: #ffff00; }
+        .light.green.active { background-color: #00ff00; }
+        
+        #north-light { top: 20px; left: 120px; }
+        #south-light { bottom: 20px; right: 120px; }
+        #west-light { left: 20px; top: 120px; }
+        #east-light { right: 20px; top: 120px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Traffic Light FSM Simulation</h1>
+        
+        <div class="controls">
+            <label for="delay">Timing Delay (seconds): </label>
+            <input type="number" id="delay" min="1" max="10" value="5">
+            <button onclick="updateDelay()">Update Delay</button>
+            <button onclick="toggleSimulation()" id="toggleBtn">Start</button>
+        </div>
+        
+        <div class="intersection">
+            <div class="road vertical"></div>
+            <div class="road horizontal"></div>
+            
+            <div class="traffic-light" id="north-light">
+                <div class="light red active"></div>
+                <div class="light yellow"></div>
+                <div class="light green"></div>
+            </div>
+            
+            <div class="traffic-light" id="south-light">
+                <div class="light red active"></div>
+                <div class="light yellow"></div>
+                <div class="light green"></div>
+            </div>
+            
+            <div class="traffic-light" id="west-light">
+                <div class="light red active"></div>
+                <div class="light yellow"></div>
+                <div class="light green"></div>
+            </div>
+            
+            <div class="traffic-light" id="east-light">
+                <div class="light red active"></div>
+                <div class="light yellow"></div>
+                <div class="light green"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let delay = 5000; // Default 5 seconds
+        let isRunning = false;
+        let intervalId = null;
+        let currentState = 0; // 0: NS Green, EW Red | 1: NS Yellow | 2: EW Green, NS Red | 3: EW Yellow
+
+        function updateLights(state) {
+            const northLight = document.getElementById('north-light');
+            const southLight = document.getElementById('south-light');
+            const westLight = document.getElementById('west-light');
+            const eastLight = document.getElementById('east-light');
+            
+            // Reset all lights
+            document.querySelectorAll('.light').forEach(light => {
+                light.classList.remove('active');
+            });
+            
+            switch(state) {
+                case 0: // NS Green, EW Red
+                    northLight.querySelector('.green').classList.add('active');
+                    southLight.querySelector('.green').classList.add('active');
+                    westLight.querySelector('.red').classList.add('active');
+                    eastLight.querySelector('.red').classList.add('active');
+                    break;
+                case 1: // NS Yellow
+                    northLight.querySelector('.yellow').classList.add('active');
+                    southLight.querySelector('.yellow').classList.add('active');
+                    westLight.querySelector('.red').classList.add('active');
+                    eastLight.querySelector('.red').classList.add('active');
+                    break;
+                case 2: // EW Green, NS Red
+                    northLight.querySelector('.red').classList.add('active');
+                    southLight.querySelector('.red').classList.add('active');
+                    westLight.querySelector('.green').classList.add('active');
+                    eastLight.querySelector('.green').classList.add('active');
+                    break;
+                case 3: // EW Yellow
+                    northLight.querySelector('.red').classList.add('active');
+                    southLight.querySelector('.red').classList.add('active');
+                    westLight.querySelector('.yellow').classList.add('active');
+                    eastLight.querySelector('.yellow').classList.add('active');
+                    break;
+            }
+        }
+
+        function updateState() {
+            currentState = (currentState + 1) % 4;
+            updateLights(currentState);
+        }
+
+        function updateDelay() {
+            const newDelay = document.getElementById('delay').value;
+            delay = newDelay * 1000;
+            
+            if (isRunning) {
+                clearInterval(intervalId);
+                intervalId = setInterval(updateState, delay);
+            }
+        }
+
+        function toggleSimulation() {
+            const toggleBtn = document.getElementById('toggleBtn');
+            isRunning = !isRunning;
+            
+            if (isRunning) {
+                toggleBtn.textContent = 'Stop';
+                intervalId = setInterval(updateState, delay);
+            } else {
+                toggleBtn.textContent = 'Start';
+                clearInterval(intervalId);
+            }
+        }
+
+        // Initialize lights
+        updateLights(currentState);
+    </script>
+</body>
+</html>
